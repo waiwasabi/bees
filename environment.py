@@ -5,6 +5,7 @@ class Environment:
     def __init__(self, environment_data):
         self.temperature = None
         self.history = [environment_data["initial_plants"]]
+        self.population = [environment_data["initial_plants"]]
         self.params = environment_data
 
     def step(self, factors):
@@ -13,7 +14,7 @@ class Environment:
         p = round(sum(self.history))
         # add plants for the next time-step based on current data
         self.history.append(self.params["gamma"] * self.pollinate(self.get_mature_plants(), factors["num_foragers"]))
-
+        self.population.append(sum(self.history))
         return p
 
     def survival(self, factors):

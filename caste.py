@@ -3,13 +3,14 @@ import math
 
 
 class Caste:
-    def __init__(self, caste_data):
+    def __init__(self, caste_data, name):
         """
         :param caste_data: a dictionary of variables to initialize a caste
         """
         self.hist_time = 0  # keeps track of oldest entry in population history
-        self.history = [caste_data["initial_population"]]
+        self.history = [caste_data[f"{name}_initial_population"]]
         self.params = caste_data
+        self.s = caste_data[f"{name}_base_survival"]
 
     def survival(self, factors):
         """
@@ -40,10 +41,9 @@ class Caste:
 
 
 class Queen(Caste):
-    def __init__(self, queen_params):
-        super().__init__(queen_params)
+    def __init__(self, params, name):
+        super().__init__(params, name)
 
-    # TODO: implement model for egg production
     def produce(self, factors):
         """
         calculates the amount of eggs laid by the queen in a time step given environmental/hive factors
@@ -58,14 +58,14 @@ class Queen(Caste):
         :param factors: dictionary of environmental/hive factors
         :return: survival rate <= 1
         """
-        x = factors["food_const"] * symlog(factors["food"]-factors["population"]) + \
+        x = factors["food_const"] * symlog(factors["food"]-factors["population"]+factors["num_foragers"]) + \
             factors["temp_const"] * (factors["temperature"] - factors["optimal_hive_temp"])
-        return normalize(self.params["base_survival"], x)
+        return normalize(self.s, x)
 
 
 class Forager(Caste):
-    def __init__(self, forager_params):
-        super().__init__(forager_params)
+    def __init__(self, params, name):
+        super().__init__(params, name)
 
     def survival(self, factors):
         """
@@ -76,12 +76,12 @@ class Forager(Caste):
         x = factors["temp_const"] * symlog(factors["temperature"] - factors["optimal_hive_temp"])
         x = x if factors["num_foragers"] == 0 \
             else x + factors["forage_const"] * symlog(factors["num_plants"]/factors["num_foragers"])
-        return normalize(self.params["base_survival"], x)
+        return normalize(self.s, x)
 
 
 class Drone(Caste):
-    def __init__(self, drone_params):
-        super().__init__(drone_params)
+    def __init__(self, params, name):
+        super().__init__(params, name)
 
     def survival(self, factors):
         """
@@ -89,14 +89,14 @@ class Drone(Caste):
         :param factors: dictionary of environmental/hive factors
         :return: survival rate <= 1
         """
-        x = factors["food_const"] * symlog(factors["food"]-factors["population"]) + \
+        x = factors["food_const"] * symlog(factors["food"]-factors["population"]+factors["num_foragers"]) + \
             factors["temp_const"] * symlog(factors["temperature"] - factors["optimal_hive_temp"])
-        return normalize(self.params["base_survival"], x)
+        return normalize(self.s, x)
 
 
 class Worker(Caste):
-    def __init__(self, worker_params):
-        super().__init__(worker_params)
+    def __init__(self, params, name):
+        super().__init__(params, name)
 
     def survival(self, factors):
         """
@@ -104,15 +104,15 @@ class Worker(Caste):
         :param factors: dictionary of environmental/hive factors
         :return: survival rate <= 1
         """
-        x = factors["food_const"] * symlog(factors["food"]-factors["population"]) + \
+        x = factors["food_const"] * symlog(factors["food"]-factors["population"]+factors["num_foragers"]) + \
             factors["temp_const"] * symlog(factors["temperature"] - factors["optimal_hive_temp"])
 
-        return normalize(self.params["base_survival"], x)
+        return normalize(self.s, x)
 
 
 class Brood(Caste):
-    def __init__(self, brood_params):
-        super().__init__(brood_params)
+    def __init__(self, params, name):
+        super().__init__(params, name)
 
     def survival(self, factors):
         """
@@ -120,11 +120,11 @@ class Brood(Caste):
         :param factors: dictionary of environmental/hive factors
         :return: survival rate <= 1
         """
-        x = factors["food_const"] * symlog(factors["food"]-factors["population"]) + \
+        x = factors["food_const"] * symlog(factors["food"]-factors["population"]+factors["num_foragers"]) + \
             factors["temp_const"] * symlog(factors["temperature"] - factors["optimal_hive_temp"]) + \
             factors["nurse_const"] * symlog((factors["num_workers"] - factors["num_brood"]))
 
-        return normalize(self.params["base_survival"], x)
+        return normalize(self.s, x)
 
     def demote(self, factors):
         if factors["time"] - self.hist_time >= factors["brood_mature_age"]:

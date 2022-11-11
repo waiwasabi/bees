@@ -6,22 +6,15 @@ import os
 
 
 class Hive:
-    def __init__(self, config_dir):
-        with open(os.path.join(config_dir, "global.json")) as f:
-            self.global_config = json.load(f)
-
+    def __init__(self, config):
+        # TODO: refactor this to config
+        self.config = config
         headers = ["Q", "F", "D", "W", "B"]
         castes = [Queen, Forager, Drone, Worker, Brood]
-        config = []
 
-        for h in headers:
-            f = open(os.path.join(config_dir, f"{h}.json"))
-            config.append(json.load(f))
-            f.close()
-
-        self.k = {h: c(cfg) for h, c, cfg in zip(headers, castes, config)}
+        self.k = {h: c(config, h) for h, c in zip(headers, castes)}
         self.population = pd.DataFrame(columns=headers)
-        self.environment = Environment(self.global_config)
+        self.environment = Environment(config)
         self.food = 10000  # TODO: configure this as a hyper-parameter?
         self.time = 0
 
@@ -37,7 +30,7 @@ class Hive:
                "population": round(sum(self.get_population())),
                "num_plants": sum(self.environment.history)
                },
-            **self.global_config
+            **self.config
         }
         return factors
 
@@ -49,8 +42,8 @@ class Hive:
         f = factors["num_foragers"]
         self.food = max(0,
                         self.food - (sum(self.get_population()) - f) +
-                        self.global_config["eta"] *
-                        min(self.global_config["phi"] * f, p))
+                        self.config["eta"] *
+                        min(self.config["phi"] * f, p))
 
     def step(self):
         # interact with environment
@@ -68,7 +61,7 @@ class Hive:
         for k in self.k.values():  # update caste states
             k.step(factors)
 
-        for k, v in self.global_config["promotion_distribution"].items():  # promotion scheme is constant.
+        for k, v in self.config["promotion_distribution"].items():  # promotion scheme is constant.
             self.k[k].promote(mature * v)
 
         self.population.loc[self.time] = self.get_population()
