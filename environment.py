@@ -1,10 +1,9 @@
-import numpy as np
-from tools import normalize
+from tools import normalize, symlog
 
 
 class Environment:
     def __init__(self, environment_data):
-        self.temperature = 0  # configure manually
+        self.temperature = None
         self.history = [environment_data["initial_plants"]]
         self.params = environment_data
 
@@ -23,7 +22,7 @@ class Environment:
         :param factors: dictionary of environmental/hive factors. Must contain temperature parameter.
         """
         temp = self.params["temp_sensitivity"]*(factors["temperature"]-self.params["optimal_temp"])
-        return normalize(self.params["plant_base_survival"], temp)
+        return normalize(self.params["plant_base_survival"], symlog(temp))
 
     def get_mature_plants(self):
         """

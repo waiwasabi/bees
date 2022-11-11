@@ -1,4 +1,4 @@
 {
-	"initial_population": 0,
-	"base_survival": 0.9
+	"initial_population": 8000,
+	"base_survival": 0.85
 }

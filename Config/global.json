@@ -1,16 +1,21 @@
 {
-  "brood_mature_age": 10,
+  "brood_mature_age": 21,
   "promotion_distribution": {
     "D": 0.5,
-    "F": 0.12,
-    "W": 0.38
+    "F": 0.2,
+    "W": 0.3
   },
-  "phi": 10,
-  "gamma": 3,
-  "mu": 4,
-  "temp_sensitivity": 0,
-  "optimal_temp": 0,
-  "food_per_plant": 1,
-  "initial_plants": 50,
-  "plant_base_survival": 0.9
+  "gamma": 6,
+  "mu": 15,
+  "eta": 21,
+  "phi": 2000,
+  "temp_sensitivity": 0.08,
+  "optimal_temp": 34.5,
+  "optimal_hive_temp": 75,
+  "initial_plants": 35000,
+  "plant_base_survival": 0.98,
+  "food_const": 0.083,
+  "temp_const": 0.29,
+  "nurse_const": 0.1,
+  "forage_const": 0.15
 }

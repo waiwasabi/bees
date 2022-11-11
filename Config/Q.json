@@ -1,5 +1,5 @@
 {
 	"initial_population": 1,
-	"base_survival": 1,
-	"birth_rate": 1500
+	"base_survival": 0.99,
+	"birth_rate": 2000
 }
