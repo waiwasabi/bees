@@ -21,14 +21,17 @@ class Hive:
 
         self.k = {h: c(cfg) for h, c, cfg in zip(headers, castes, config)}
         self.population = pd.DataFrame(columns=headers)
-        self.environment = Environment()
+        self.environment = Environment(self.global_config)
+        self.food = 0  # TODO: configure this as a hyper-parameter?
         self.time = 0
 
     # TODO: get environmental factors
     def get_factors(self):
         factors = {
-            **{"temp": self.environment.temperature,
+            **{"temperature": self.environment.temperature,
+               "food": self.food,
                "time": self.time,
+               "num_foragers": self.k["F"].get_population()
                },
             **self.global_config
         }
@@ -37,12 +40,21 @@ class Hive:
     def get_population(self):
         return [caste.get_population() for caste in self.k.values()]
 
+    def forage(self, factors):
+        p = self.environment.step(factors)
+        f = factors["num_foragers"]
+        self.food = max(0,
+                        self.food - (sum(self.get_population()) - f) +
+                        self.global_config["food_per_plant"] *
+                        min(self.global_config["phi"] * f, p))
+
     def step(self):
         # interact with environment
         # calculate survival and update caste states
         # increment time and store data
 
         factors = self.get_factors()  # get environmental/hive factors
+        self.forage(factors)
         delta = self.k["Q"].produce(factors)  # queen lays eggs
         self.k["B"].promote(delta)  # add eggs to brood
         mature = self.k["B"].demote(factors)  # get number of brood that have matured

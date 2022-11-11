@@ -1,7 +1,4 @@
 import numpy as np
-
-
-# TODO: figure this out
 from tools import normalize
 
 
@@ -14,8 +11,11 @@ class Environment:
     def step(self, factors):
         s = self.survival(factors)
         self.history = [h * s for h in self.history]
+        p = round(sum(self.history))
         # add plants for the next time-step based on current data
         self.history.append(self.params["gamma"] * self.pollinate(self.get_mature_plants(), factors["num_foragers"]))
+
+        return p
 
     def survival(self, factors):
         """
@@ -23,7 +23,7 @@ class Environment:
         :param factors: dictionary of environmental/hive factors. Must contain temperature parameter.
         """
         temp = self.params["temp_sensitivity"]*(factors["temperature"]-self.params["optimal_temp"])
-        return normalize(self.params["base_survival"], temp)
+        return normalize(self.params["plant_base_survival"], temp)
 
     def get_mature_plants(self):
         """
@@ -41,6 +41,4 @@ class Environment:
         :param y: number of foragers
         :return: number of plants pollinated
         """
-        return x - x*(1-((x-1)/x)**(self.params["phi"]*y))
-
-
+        return 0 if x == 0 else x - x*(1-((x-1)/x)**(self.params["phi"]*y))
